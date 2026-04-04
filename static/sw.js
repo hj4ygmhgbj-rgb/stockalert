@@ -1,7 +1,8 @@
-const CACHE_NAME = 'stockalert-v1';
+const CACHE_NAME = 'stockalert-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
+  '/alerts.html',
   '/manifest.json',
 ];
 

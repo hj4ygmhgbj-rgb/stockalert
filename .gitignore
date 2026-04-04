@@ -1,0 +1,4 @@
+__pycache__/
+*.pyc
+triggered_alerts.json
+.DS_Store

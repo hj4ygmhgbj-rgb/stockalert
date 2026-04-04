@@ -1,11 +1,11 @@
 {
-  "name": "StockAlert - Koersalarmen",
+  "name": "StockAlert - Stock Alerts",
   "short_name": "StockAlert",
-  "description": "Koersalarmen voor AEX, Dow Jones en S&P 500",
-  "start_url": "/",
+  "description": "Stock price alerts with iMessage, Signal & WhatsApp notifications",
+  "start_url": "/alerts.html",
   "display": "standalone",
   "background_color": "#0a0a0a",
-  "theme_color": "#1a73e8",
+  "theme_color": "#0a0a0a",
   "orientation": "portrait",
   "icons": [
     {
