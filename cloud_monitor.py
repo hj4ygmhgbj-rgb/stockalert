@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Cloud-based stock monitor for GitHub Actions.
-Reads alerts from ALERTS_CONFIG secret, checks prices, sends ntfy notifications.
+Reads alerts from alerts_config.json file, checks prices, sends ntfy notifications.
 Triggered alerts are tracked via a GitHub Actions artifact.
 """
 
@@ -79,19 +79,20 @@ def save_triggered(triggered):
 
 
 def main():
-    # Load config from environment
-    config_json = os.environ.get("ALERTS_CONFIG", "")
-    ntfy_topic = os.environ.get("NTFY_TOPIC", "")
-
-    if not config_json:
-        print("ERROR: ALERTS_CONFIG secret not set")
+    # Load alerts from alerts_config.json file
+    config_path = Path("alerts_config.json")
+    if not config_path.exists():
+        print("ERROR: alerts_config.json not found")
         return
+
+    config = json.loads(config_path.read_text())
+    alerts = config.get("alerts", [])
+
+    # Load ntfy topic from environment
+    ntfy_topic = os.environ.get("NTFY_TOPIC", "")
     if not ntfy_topic:
         print("ERROR: NTFY_TOPIC secret not set")
         return
-
-    config = json.loads(config_json)
-    alerts = config.get("alerts", [])
     now = datetime.utcnow().strftime("%H:%M UTC")
 
     # Load previously triggered alerts

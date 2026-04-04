@@ -22,7 +22,6 @@ jobs:
       - name: Check stock prices and send alerts
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
-          ALERTS_CONFIG: ${{ secrets.ALERTS_CONFIG }}
         run: python3 cloud_monitor.py
 
       - name: Save triggered alerts state

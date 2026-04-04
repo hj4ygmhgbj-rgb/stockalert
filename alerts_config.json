@@ -1,0 +1,32 @@
+{
+  "alerts": [
+    {
+      "symbol": "SHELL.AS",
+      "name": "SHELL PLC",
+      "condition": "below",
+      "target_price": 40.09,
+      "enabled": true
+    },
+    {
+      "symbol": "^GSPC",
+      "name": "S&P 500",
+      "condition": "above",
+      "target_price": 6550.0,
+      "enabled": true
+    },
+    {
+      "symbol": "ASML",
+      "name": "ASML Holding N.V.",
+      "condition": "above",
+      "target_price": 1138.0,
+      "enabled": true
+    },
+    {
+      "symbol": "BRK-B",
+      "name": "Berkshire Hathaway Inc.",
+      "condition": "below",
+      "target_price": 477.86,
+      "enabled": true
+    }
+  ]
+}
