@@ -11,15 +11,15 @@
       "symbol": "^GSPC",
       "name": "S&P 500",
       "condition": "above",
-      "target_price": 6550.0,
+      "target_price": 6550,
       "enabled": true
     },
     {
       "symbol": "ASML",
       "name": "ASML Holding N.V.",
       "condition": "above",
-      "target_price": 1138.0,
-      "enabled": true
+      "target_price": 1138,
+      "enabled": false
     },
     {
       "symbol": "BRK-B",
