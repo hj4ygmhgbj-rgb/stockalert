@@ -65,15 +65,42 @@ body{
 .alert-card .symbol{font-size:18px;font-weight:700;color:#fff}
 .alert-card .name{font-size:13px;color:#888;margin-top:2px}
 .alert-card .prices{text-align:right}
-.alert-card .current{font-size:15px;color:#ccc}
-.alert-card .target{font-size:13px;color:#888;margin-top:2px}
+.alert-card .current{font-size:17px;font-weight:600;color:#fff}
+.alert-card .target{font-size:13px;color:#888;margin-top:2px;cursor:pointer;border-bottom:1px dashed #555}
+.alert-card .target:active{color:#0a84ff}
 .alert-card .condition-badge{
   display:inline-block;font-size:11px;font-weight:600;
-  padding:2px 8px;border-radius:6px;margin-top:4px;
+  padding:2px 8px;border-radius:6px;margin-top:4px;cursor:pointer;
 }
+.alert-card .condition-badge:active{opacity:0.7}
 .alert-card .condition-badge.above{background:#0d3a1a;color:#30d158}
 .alert-card .condition-badge.below{background:#3a0d0d;color:#ff453a}
 .alert-card .actions{display:flex;gap:12px;align-items:center;margin-top:10px}
+.alert-card .price-diff{font-size:11px;margin-top:2px}
+.alert-card .price-diff.near{color:#ff9f0a}
+.alert-card .price-diff.far{color:#888}
+
+/* Edit modal */
+.edit-overlay{
+  position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);
+  z-index:60;display:none;align-items:center;justify-content:center;
+}
+.edit-overlay.show{display:flex}
+.edit-modal{
+  background:#1c1c1e;border-radius:16px;padding:24px;
+  width:90%;max-width:360px;
+}
+.edit-modal h3{font-size:17px;color:#fff;margin-bottom:16px;text-align:center}
+.edit-modal .edit-row{margin-bottom:14px}
+.edit-modal .edit-row label{display:block;font-size:13px;color:#888;margin-bottom:4px}
+.edit-modal .edit-row input,.edit-modal .edit-row select{
+  width:100%;background:#0a0a0a;border:1px solid #333;border-radius:10px;
+  padding:12px;color:#fff;font-size:16px;outline:none;
+}
+.edit-modal .edit-row input:focus,.edit-modal .edit-row select:focus{border-color:#0a84ff}
+.edit-modal .edit-row select{appearance:none;-webkit-appearance:none}
+.edit-buttons{display:flex;gap:8px;margin-top:16px}
+.edit-buttons .btn{flex:1}
 
 /* Toggle switch */
 .toggle{position:relative;width:51px;height:31px;flex-shrink:0}
@@ -207,6 +234,31 @@ body{
     <button class="btn btn-primary" onclick="saveSettings()">Save</button>
     <button class="btn btn-secondary" onclick="hideSettings()">Cancel</button>
     <button class="btn btn-danger" style="margin-top:20px" onclick="clearSettings()">Clear All Data</button>
+  </div>
+</div>
+
+<!-- Edit Alert Modal -->
+<div class="edit-overlay" id="editModal">
+  <div class="edit-modal">
+    <h3 id="editTitle">Edit Alert</h3>
+    <div class="edit-row">
+      <label>Condition</label>
+      <select id="editCondition">
+        <option value="above">Above</option>
+        <option value="below">Below</option>
+      </select>
+    </div>
+    <div class="edit-row">
+      <label>Target Price</label>
+      <input type="number" id="editTarget" step="0.01">
+    </div>
+    <div class="edit-row">
+      <label id="editCurrentLabel" style="color:#666">Current price: —</label>
+    </div>
+    <div class="edit-buttons">
+      <button class="btn btn-secondary" onclick="hideEdit()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEdit()">Save</button>
+    </div>
   </div>
 </div>
 
@@ -367,11 +419,22 @@ function renderAlerts() {
   }
   container.innerHTML = currentAlerts.map((a, i) => {
     const price = priceCache[a.symbol];
-    const priceStr = price ? price.toFixed(2) : 'N/A';
+    const priceStr = price ? price.toFixed(2) : '—';
     const disabledClass = a.enabled ? '' : ' disabled';
     const checkedAttr = a.enabled ? ' checked' : '';
+
+    // Calculate distance to target
+    let diffHtml = '';
+    if (price) {
+      const diff = ((a.target_price - price) / price * 100);
+      const absDiff = Math.abs(diff).toFixed(1);
+      const nearClass = Math.abs(diff) < 3 ? 'near' : 'far';
+      const arrow = diff > 0 ? '↑' : '↓';
+      diffHtml = `<div class="price-diff ${nearClass}">${arrow} ${absDiff}% to target</div>`;
+    }
+
     return `<div class="alert-card ${a.condition}${disabledClass}">
-      <div class="row">
+      <div class="row" onclick="editAlert(${i})" style="cursor:pointer">
         <div>
           <div class="symbol">${esc(a.symbol)}</div>
           <div class="name">${esc(a.name || '')}</div>
@@ -380,13 +443,15 @@ function renderAlerts() {
         <div class="prices">
           <div class="current">${priceStr}</div>
           <div class="target">Target: ${a.target_price.toFixed(2)}</div>
+          ${diffHtml}
         </div>
       </div>
       <div class="actions">
         <label class="toggle">
-          <input type="checkbox"${checkedAttr} onchange="toggleAlert(${i}, this.checked)">
+          <input type="checkbox"${checkedAttr} onchange="event.stopPropagation();toggleAlert(${i}, this.checked)">
           <span class="slider"></span>
         </label>
+        <button class="delete-btn" onclick="editAlert(${i})">Edit</button>
         <button class="delete-btn" onclick="deleteAlert(${i})">Delete</button>
       </div>
     </div>`;
@@ -446,6 +511,54 @@ async function addAlert() {
     renderAlerts();
   }
 }
+
+// --- Edit alert ---
+let editIndex = -1;
+
+function editAlert(index) {
+  editIndex = index;
+  const a = currentAlerts[index];
+  const price = priceCache[a.symbol];
+  document.getElementById('editTitle').textContent = `Edit ${a.symbol}`;
+  document.getElementById('editCondition').value = a.condition;
+  document.getElementById('editTarget').value = a.target_price;
+  document.getElementById('editCurrentLabel').textContent = price
+    ? `Current price: ${price.toFixed(2)}`
+    : 'Current price: unavailable';
+  document.getElementById('editModal').classList.add('show');
+}
+
+function hideEdit() {
+  document.getElementById('editModal').classList.remove('show');
+  editIndex = -1;
+}
+
+async function saveEdit() {
+  if (editIndex < 0) return;
+  const condition = document.getElementById('editCondition').value;
+  const target = parseFloat(document.getElementById('editTarget').value);
+  if (isNaN(target) || target <= 0) { showToast('Enter a valid price', 'error'); return; }
+
+  const oldCondition = currentAlerts[editIndex].condition;
+  const oldTarget = currentAlerts[editIndex].target_price;
+  currentAlerts[editIndex].condition = condition;
+  currentAlerts[editIndex].target_price = target;
+  renderAlerts();
+  hideEdit();
+
+  try {
+    await saveAlerts(`Edit alert: ${currentAlerts[editIndex].symbol} ${condition} ${target}`);
+  } catch {
+    currentAlerts[editIndex].condition = oldCondition;
+    currentAlerts[editIndex].target_price = oldTarget;
+    renderAlerts();
+  }
+}
+
+// Close edit modal on backdrop tap
+document.addEventListener('click', (e) => {
+  if (e.target.id === 'editModal') hideEdit();
+});
 
 // --- Symbol lookup ---
 function onSymbolInput() {
