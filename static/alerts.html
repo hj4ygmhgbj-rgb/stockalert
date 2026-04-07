@@ -193,7 +193,7 @@ body{
 <div class="section">
   <div class="section-title">Active Alerts</div>
   <div id="alertsList" class="loading">Loading...</div>
-  <div class="refresh-note">Auto-refreshes every 60s</div>
+  <div class="refresh-note" id="refreshNote">Auto-refreshes every 60s</div>
 </div>
 
 <!-- Add Alert -->
@@ -343,9 +343,21 @@ async function loadAlerts() {
     currentAlerts = data.alerts || [];
     renderAlerts();
     fetchPrices();
+    updateRefreshNote();
   } catch (e) {
     document.getElementById('alertsList').innerHTML = '<div class="empty-state">Failed to load alerts. Check settings.</div>';
     showToast('Load failed: ' + e.message, 'error');
+  }
+}
+
+function updateRefreshNote() {
+  const note = document.getElementById('refreshNote');
+  if (priceUpdateTime === 'live') {
+    note.textContent = 'Prices: live from local server';
+  } else if (priceUpdateTime) {
+    note.textContent = `Prices updated: ${priceUpdateTime}`;
+  } else {
+    note.textContent = 'Auto-refreshes every 60s';
   }
 }
 
@@ -373,13 +385,14 @@ function tryLocalUpdate() {
 
 // --- Price fetching ---
 let priceCache = {};
+let priceUpdateTime = '';
 
 async function fetchPrices() {
   if (currentAlerts.length === 0) return;
-  const symbols = [...new Set(currentAlerts.map(a => a.symbol))];
 
-  // Try local server first
+  // Try local server first (works when MacBook is on)
   try {
+    const symbols = [...new Set(currentAlerts.map(a => a.symbol))];
     const r = await fetch(`http://localhost:8080/api/quotes?symbols=${symbols.join(',')}`, { signal: AbortSignal.timeout(2000) });
     if (r.ok) {
       const data = await r.json();
@@ -387,27 +400,26 @@ async function fetchPrices() {
         for (const [sym, info] of Object.entries(data)) {
           if (info && info.price) priceCache[sym] = info.price;
         }
+        priceUpdateTime = 'live';
         renderAlerts();
         return;
       }
     }
   } catch {}
 
-  // Fallback: try Yahoo Finance directly (may fail due to CORS)
-  for (const sym of symbols) {
-    try {
-      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=1d`;
-      const r = await fetch(url, { signal: AbortSignal.timeout(3000) });
-      if (r.ok) {
-        const data = await r.json();
-        const meta = data?.chart?.result?.[0]?.meta;
-        if (meta?.regularMarketPrice) {
-          priceCache[sym] = meta.regularMarketPrice;
-        }
+  // Fallback: read prices.json from GitHub (updated every 5 min by workflow)
+  try {
+    const file = await ghGet('prices.json');
+    const decoded = decodeURIComponent(escape(atob(file.content.replace(/\n/g, ''))));
+    const data = JSON.parse(decoded);
+    if (data.prices) {
+      for (const [sym, info] of Object.entries(data.prices)) {
+        if (info && info.price) priceCache[sym] = info.price;
       }
-    } catch {}
-  }
-  renderAlerts();
+      priceUpdateTime = data.updated || '';
+      renderAlerts();
+    }
+  } catch {}
 }
 
 // --- Render alerts ---

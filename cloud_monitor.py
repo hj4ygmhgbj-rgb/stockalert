@@ -107,8 +107,8 @@ def main():
         print(f"[{now}] No active alerts.")
         return
 
-    # Collect unique symbols
-    symbols = list(set(a["symbol"] for a in active))
+    # Collect unique symbols from ALL alerts (not just active, so prices show for disabled ones too)
+    symbols = list(set(a["symbol"] for a in alerts))
     print(f"[{now}] Checking {len(symbols)} symbol(s): {', '.join(symbols)}")
 
     # Fetch prices
@@ -151,6 +151,22 @@ def main():
                 triggered.add(alert_key)
 
     save_triggered(triggered)
+
+    # Save latest prices to prices.json so the web UI can display them
+    prices_data = {
+        "updated": now,
+        "prices": {
+            sym: {
+                "price": info["price"],
+                "name": info["name"],
+                "currency": info["currency"],
+            }
+            for sym, info in prices.items()
+        },
+    }
+    PRICES_FILE = Path("prices.json")
+    PRICES_FILE.write_text(json.dumps(prices_data, indent=2) + "\n")
+    print(f"  Saved prices for {len(prices)} symbol(s) to prices.json")
 
 
 if __name__ == "__main__":
