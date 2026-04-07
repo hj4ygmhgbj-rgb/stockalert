@@ -12,7 +12,7 @@
       "name": "ASML Holding N.V.",
       "condition": "above",
       "target_price": 1138,
-      "enabled": false
+      "enabled": true
     },
     {
       "symbol": "BRK-B",
