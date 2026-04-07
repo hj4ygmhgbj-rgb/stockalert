@@ -22,8 +22,8 @@
       "enabled": true
     },
     {
-      "symbol": "SHELL",
-      "name": "SHELL",
+      "symbol": "SHELL.AS",
+      "name": "SHELL PLC",
       "condition": "above",
       "target_price": 40.8,
       "enabled": true
