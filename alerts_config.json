@@ -1,13 +1,6 @@
 {
   "alerts": [
     {
-      "symbol": "SHELL.AS",
-      "name": "SHELL PLC",
-      "condition": "below",
-      "target_price": 40.09,
-      "enabled": true
-    },
-    {
       "symbol": "^GSPC",
       "name": "S&P 500",
       "condition": "above",
