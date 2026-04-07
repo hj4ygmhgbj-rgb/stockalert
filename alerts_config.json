@@ -1,8 +1,8 @@
 {
   "alerts": [
     {
-      "symbol": "ASML",
-      "name": "ASML",
+      "symbol": "ASML.AS",
+      "name": "ASML HOLDING",
       "condition": "above",
       "target_price": 1138,
       "enabled": true
