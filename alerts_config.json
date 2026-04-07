@@ -8,13 +8,6 @@
       "enabled": true
     },
     {
-      "symbol": "ASML",
-      "name": "ASML Holding N.V.",
-      "condition": "above",
-      "target_price": 1138,
-      "enabled": true
-    },
-    {
       "symbol": "BRK-B",
       "name": "Berkshire Hathaway Inc.",
       "condition": "below",
