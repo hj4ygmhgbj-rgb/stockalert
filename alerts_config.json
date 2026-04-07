@@ -1,13 +1,6 @@
 {
   "alerts": [
     {
-      "symbol": "^GSPC",
-      "name": "S&P 500",
-      "condition": "above",
-      "target_price": 6550,
-      "enabled": true
-    },
-    {
       "symbol": "BRK-B",
       "name": "Berkshire Hathaway Inc.",
       "condition": "below",
