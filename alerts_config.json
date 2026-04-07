@@ -27,6 +27,13 @@
       "condition": "above",
       "target_price": 1138,
       "enabled": true
+    },
+    {
+      "symbol": "^GSPC",
+      "name": "^GSPC",
+      "condition": "below",
+      "target_price": 6539,
+      "enabled": true
     }
   ]
 }
