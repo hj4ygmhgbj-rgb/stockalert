@@ -20,6 +20,13 @@
       "condition": "below",
       "target_price": 40.19,
       "enabled": true
+    },
+    {
+      "symbol": "ASML",
+      "name": "ASML",
+      "condition": "above",
+      "target_price": 1138,
+      "enabled": true
     }
   ]
 }
