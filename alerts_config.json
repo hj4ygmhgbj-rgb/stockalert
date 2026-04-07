@@ -20,6 +20,13 @@
       "condition": "below",
       "target_price": 477.86,
       "enabled": true
+    },
+    {
+      "symbol": "SHELL",
+      "name": "SHELL",
+      "condition": "below",
+      "target_price": 40.19,
+      "enabled": true
     }
   ]
 }
