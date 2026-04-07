@@ -242,6 +242,10 @@ body{
   <div class="edit-modal">
     <h3 id="editTitle">Edit Alert</h3>
     <div class="edit-row">
+      <label>Symbol</label>
+      <input type="text" id="editSymbol" autocapitalize="characters" spellcheck="false">
+    </div>
+    <div class="edit-row">
       <label>Condition</label>
       <select id="editCondition">
         <option value="above">Above</option>
@@ -531,7 +535,8 @@ function editAlert(index) {
   editIndex = index;
   const a = currentAlerts[index];
   const price = priceCache[a.symbol];
-  document.getElementById('editTitle').textContent = `Edit ${a.symbol}`;
+  document.getElementById('editTitle').textContent = `Edit ${a.name || a.symbol}`;
+  document.getElementById('editSymbol').value = a.symbol;
   document.getElementById('editCondition').value = a.condition;
   document.getElementById('editTarget').value = a.target_price;
   document.getElementById('editCurrentLabel').textContent = price
@@ -547,12 +552,16 @@ function hideEdit() {
 
 async function saveEdit() {
   if (editIndex < 0) return;
+  const symbol = document.getElementById('editSymbol').value.trim().toUpperCase();
   const condition = document.getElementById('editCondition').value;
   const target = parseFloat(document.getElementById('editTarget').value);
+  if (!symbol) { showToast('Enter a symbol', 'error'); return; }
   if (isNaN(target) || target <= 0) { showToast('Enter a valid price', 'error'); return; }
 
+  const oldSymbol = currentAlerts[editIndex].symbol;
   const oldCondition = currentAlerts[editIndex].condition;
   const oldTarget = currentAlerts[editIndex].target_price;
+  currentAlerts[editIndex].symbol = symbol;
   currentAlerts[editIndex].condition = condition;
   currentAlerts[editIndex].target_price = target;
   renderAlerts();
@@ -561,6 +570,7 @@ async function saveEdit() {
   try {
     await saveAlerts(`Edit alert: ${currentAlerts[editIndex].symbol} ${condition} ${target}`);
   } catch {
+    currentAlerts[editIndex].symbol = oldSymbol;
     currentAlerts[editIndex].condition = oldCondition;
     currentAlerts[editIndex].target_price = oldTarget;
     renderAlerts();
@@ -587,39 +597,56 @@ async function lookupSymbol(sym) {
   const info = document.getElementById('symbolInfo');
   info.textContent = 'Looking up...';
 
-  // Try local server
+  // Prefer Amsterdam (.AS) listing, then try the raw symbol
+  const candidates = [];
+  const upper = sym.toUpperCase();
+  if (!upper.includes('.')) {
+    candidates.push(upper + '.AS'); // Try Amsterdam first
+  }
+  candidates.push(upper);
+
+  // Try local server first
   try {
-    const r = await fetch(`http://localhost:8080/api/quotes?symbols=${encodeURIComponent(sym)}`, { signal: AbortSignal.timeout(2000) });
+    const allSyms = candidates.join(',');
+    const r = await fetch(`http://localhost:8080/api/quotes?symbols=${encodeURIComponent(allSyms)}`, { signal: AbortSignal.timeout(2000) });
     if (r.ok) {
       const data = await r.json();
-      const q = data[sym.toUpperCase()] || data[sym];
-      if (q && q.price) {
-        info.textContent = `${q.name || sym} - Current: ${q.price.toFixed(2)}`;
-        info.dataset.name = q.name || sym;
-        return;
+      for (const candidate of candidates) {
+        const q = data[candidate];
+        if (q && q.price) {
+          info.textContent = `${q.name || candidate} (${candidate}) — ${q.price.toFixed(2)}`;
+          info.dataset.name = q.name || candidate;
+          info.dataset.resolvedSymbol = candidate;
+          document.getElementById('addSymbol').value = candidate;
+          return;
+        }
       }
     }
   } catch {}
 
-  // Try Yahoo Finance directly
-  try {
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=1d`;
-    const r = await fetch(url, { signal: AbortSignal.timeout(3000) });
-    if (r.ok) {
-      const data = await r.json();
-      const meta = data?.chart?.result?.[0]?.meta;
-      if (meta) {
-        const price = meta.regularMarketPrice;
-        const name = meta.shortName || sym;
-        info.textContent = `${name} - Current: ${price.toFixed(2)}`;
-        info.dataset.name = name;
-        return;
+  // Fallback: try Yahoo Finance directly for each candidate
+  for (const candidate of candidates) {
+    try {
+      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(candidate)}?interval=1d&range=1d`;
+      const r = await fetch(url, { signal: AbortSignal.timeout(3000) });
+      if (r.ok) {
+        const data = await r.json();
+        const meta = data?.chart?.result?.[0]?.meta;
+        if (meta) {
+          const price = meta.regularMarketPrice;
+          const name = meta.shortName || candidate;
+          info.textContent = `${name} (${candidate}) — ${price.toFixed(2)}`;
+          info.dataset.name = name;
+          info.dataset.resolvedSymbol = candidate;
+          document.getElementById('addSymbol').value = candidate;
+          return;
+        }
       }
-    }
-  } catch {}
+    } catch {}
+  }
 
   info.textContent = 'Price unavailable (will still alert via cloud monitor)';
-  info.dataset.name = sym.toUpperCase();
+  info.dataset.name = upper;
 }
 
 // --- Settings ---
