@@ -1,13 +1,6 @@
 {
   "alerts": [
     {
-      "symbol": "SHELL",
-      "name": "SHELL",
-      "condition": "below",
-      "target_price": 40.19,
-      "enabled": true
-    },
-    {
       "symbol": "ASML",
       "name": "ASML",
       "condition": "above",
