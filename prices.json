@@ -1,24 +1,24 @@
 {
-  "updated": "19:54 UTC",
+  "updated": "22:02 UTC",
   "prices": {
-    "SHELL.AS": {
-      "price": 39.58,
-      "name": "SHELL PLC",
-      "currency": "EUR"
-    },
-    "BRK-B": {
-      "price": 485.83,
-      "name": "Berkshire Hathaway Inc. New",
-      "currency": "USD"
-    },
     "ASML.AS": {
       "price": 1234.8,
       "name": "ASML HOLDING",
       "currency": "EUR"
     },
+    "SHELL.AS": {
+      "price": 39.58,
+      "name": "SHELL PLC",
+      "currency": "EUR"
+    },
     "^GSPC": {
-      "price": 6827.59,
+      "price": 6824.66,
       "name": "S&P 500",
+      "currency": "USD"
+    },
+    "BRK-B": {
+      "price": 485.2,
+      "name": "Berkshire Hathaway Inc. New",
       "currency": "USD"
     }
   }
