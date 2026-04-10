@@ -12,7 +12,7 @@
       "name": "^GSPC",
       "condition": "below",
       "target_price": 6539,
-      "enabled": true
+      "enabled": false
     },
     {
       "symbol": "BRK-B",
