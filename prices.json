@@ -1,5 +1,5 @@
 {
-  "updated": "17:35 UTC",
+  "updated": "19:55 UTC",
   "prices": {
     "SHELL.AS": {
       "price": 39.265,
@@ -12,12 +12,12 @@
       "currency": "EUR"
     },
     "BRK-B": {
-      "price": 480.455,
+      "price": 479.37,
       "name": "Berkshire Hathaway Inc. New",
       "currency": "USD"
     },
     "^GSPC": {
-      "price": 6812.45,
+      "price": 6811.05,
       "name": "S&P 500",
       "currency": "USD"
     }
