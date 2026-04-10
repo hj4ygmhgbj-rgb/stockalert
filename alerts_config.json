@@ -5,7 +5,7 @@
       "name": "ASML HOLDING",
       "condition": "above",
       "target_price": 1138,
-      "enabled": true
+      "enabled": false
     },
     {
       "symbol": "^GSPC",
