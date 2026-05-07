@@ -1,19 +1,19 @@
 {
-  "updated": "20:40 UTC",
+  "updated": "21:38 UTC",
   "prices": {
     "^GSPC": {
       "price": 7337.11,
       "name": "S&P 500",
       "currency": "USD"
     },
-    "SHELL.AS": {
-      "price": 36.09,
-      "name": "SHELL PLC",
-      "currency": "EUR"
-    },
     "ASML.AS": {
       "price": 1300.0,
       "name": "ASML HOLDING",
+      "currency": "EUR"
+    },
+    "SHELL.AS": {
+      "price": 36.09,
+      "name": "SHELL PLC",
       "currency": "EUR"
     },
     "BRK-B": {
