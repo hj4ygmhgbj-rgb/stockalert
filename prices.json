@@ -1,8 +1,8 @@
 {
-  "updated": "22:31 UTC",
+  "updated": "09:30 UTC",
   "prices": {
     "ASML.AS": {
-      "price": 1305.0,
+      "price": 1331.2,
       "name": "ASML HOLDING",
       "currency": "EUR"
     },
@@ -12,7 +12,7 @@
       "currency": "USD"
     },
     "SHELL.AS": {
-      "price": 37.15,
+      "price": 36.355,
       "name": "SHELL PLC",
       "currency": "EUR"
     },
